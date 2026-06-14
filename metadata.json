@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Precificador de Pneus Michelin",
+  "description": "Sistema completo de comercialização e precificação de pneus Michelin e BFGoodrich para revendedores especialistas do Espírito Santo.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

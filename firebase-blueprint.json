@@ -1,0 +1,117 @@
+{
+  "entities": {
+    "Produto": {
+      "title": "Produto",
+      "description": "Especificação de pneu Michelin ou BFGoodrich",
+      "type": "object",
+      "properties": {
+        "cai": { "type": "string", "description": "Código do Artigo" },
+        "descricao": { "type": "string", "description": "Dimensão e modelo" },
+        "segmento": { "type": "string", "description": "Segmento de mercado, ex: Passeio" },
+        "marca": { "type": "string", "description": "Marca: MIC, BFG, etc." },
+        "escultura": { "type": "string", "description": "Modelo de escultura do pneu" },
+        "aro": { "type": "string", "description": "Diâmetro do aro" },
+        "precoPisCofins": { "type": "number", "description": "Preço base PIS/COFINS" },
+        "precoTabelaOracle": { "type": "number", "description": "Preço de tabela" },
+        "descontoCanal": { "type": "number", "description": "Percentual de desconto canal" },
+        "descontoQualidade": { "type": "number", "description": "Percentual de desconto qualidade" },
+        "descontoAgilis": { "type": "number", "description": "Percentual de desconto agilis" },
+        "descontoDesconcentracao": { "type": "number", "description": "Percentual de desconto desconcentração" },
+        "precoSellIn": { "type": "number", "description": "Preço sell-in calculado" },
+        "precoSellOut": { "type": "number", "description": "Preço sell-out sugerido" },
+        "id_cai": { "type": "string" },
+        "medida": { "type": "string" },
+        "indice_carga": { "type": "string" },
+        "indice_velocidade": { "type": "string" },
+        "modelo": { "type": "string" },
+        "canal": { "type": "string" },
+        "categoria": { "type": "string" },
+        "origem": { "type": "string" },
+        "data_importacao": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "required": ["cai", "descricao", "segmento", "marca", "escultura", "aro", "precoPisCofins", "precoTabelaOracle", "precoSellIn", "precoSellOut"]
+    },
+    "DescontosGlobais": {
+      "title": "DescontosGlobais",
+      "description": "Fatores de desconto global",
+      "type": "object",
+      "properties": {
+        "canal": { "type": "number" },
+        "qualidade": { "type": "number" },
+        "agilis": { "type": "number" },
+        "qualidadeLevorin": { "type": "number" },
+        "desconcentracao": { "type": "number" }
+      },
+      "required": ["canal", "qualidade", "agilis", "qualidadeLevorin", "desconcentracao"]
+    },
+    "PerfilMaquininha": {
+      "title": "PerfilMaquininha",
+      "description": "Perfil de taxas de maquininha de cartão",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nome": { "type": "string" },
+        "isAtivo": { "type": "boolean" },
+        "isAtivoPromocional": { "type": "boolean" },
+        "taxas": {
+          "type": "object",
+          "properties": {
+            "debito": { "type": "number" },
+            "1x": { "type": "number" },
+            "2x": { "type": "number" },
+            "3x": { "type": "number" },
+            "4x": { "type": "number" },
+            "5x": { "type": "number" },
+            "6x": { "type": "number" },
+            "7x": { "type": "number" },
+            "8x": { "type": "number" },
+            "9x": { "type": "number" },
+            "10x": { "type": "number" },
+            "11x": { "type": "number" },
+            "12x": { "type": "number" }
+          }
+        }
+      },
+      "required": ["id", "nome", "isAtivo"]
+    },
+    "ItemPromocional": {
+      "title": "ItemPromocional",
+      "description": "Desconto promocional associado a um CAI",
+      "type": "object",
+      "properties": {
+        "cai": { "type": "string" },
+        "descontoPromocional": { "type": "number" }
+      },
+      "required": ["cai", "descontoPromocional"]
+    },
+    "ConfigGeral": {
+      "title": "ConfigGeral",
+      "description": "Gerais do sistema",
+      "type": "object",
+      "properties": {
+        "descontosGlobais": { "$ref": "#/entities/DescontosGlobais" },
+        "ultimaImportacao": { "type": "string" }
+      },
+      "required": ["descontosGlobais"]
+    }
+  },
+  "firestore": {
+    "/produtos/{cai}": {
+      "schema": "#/entities/Produto",
+      "description": "Tabela de pneu michelin importados e precificados"
+    },
+    "/perfisMaquininha/{id}": {
+      "schema": "#/entities/PerfilMaquininha",
+      "description": "Perfis de taxas de cartão"
+    },
+    "/itensPromocionais/{cai}": {
+      "schema": "#/entities/ItemPromocional",
+      "description": "Descontos promocionais específicos por produto"
+    },
+    "/configuracoes/{docId}": {
+      "schema": "#/entities/ConfigGeral",
+      "description": "Configurações globais do sistema"
+    }
+  }
+}

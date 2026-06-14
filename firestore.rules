@@ -1,0 +1,95 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // 1. Global safety net - Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- PRIMITIVE GLOBAL HELPERS ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- STRUCTURAL ENFORCERS ---
+    function isValidProduto(p) {
+      return p.keys().hasAll(['cai', 'descricao', 'segmento', 'marca', 'escultura', 'aro', 'precoPisCofins', 'precoTabelaOracle', 'precoSellIn', 'precoSellOut'])
+        && p.cai is string && p.cai.size() <= 64
+        && p.descricao is string && p.descricao.size() <= 500
+        && p.segmento is string && p.segmento.size() <= 128
+        && p.marca is string && p.marca.size() <= 64
+        && p.escultura is string && p.escultura.size() <= 128
+        && p.aro is string && p.aro.size() <= 32
+        && p.precoPisCofins is number
+        && p.precoTabelaOracle is number
+        && p.precoSellIn is number
+        && p.precoSellOut is number;
+    }
+
+    function isValidPerfil(p) {
+      return p.keys().hasAll(['id', 'nome', 'isAtivo'])
+        && p.id is string && p.id.size() <= 64
+        && p.nome is string && p.nome.size() <= 200
+        && p.isAtivo is bool;
+    }
+
+    function isValidPromo(promotion) {
+      return promotion.keys().hasAll(['cai', 'descontoPromocional'])
+        && promotion.cai is string && promotion.cai.size() <= 64
+        && promotion.descontoPromocional is number;
+    }
+
+    function isValidConfig(c) {
+      return c.keys().hasAll(['descontosGlobais'])
+        && c.descontosGlobais is map
+        && c.descontosGlobais.keys().hasAll(['canal', 'qualidade', 'agilis', 'qualidadeLevorin', 'desconcentracao']);
+    }
+
+    // --- MATCH BLOCKS FOR COLLECTIONS ---
+
+    match /produtos/{cai} {
+      allow get: if isSignedIn() && isValidId(cai);
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(cai) && isValidProduto(incoming()) && incoming().cai == cai;
+      allow update: if isSignedIn() && isValidId(cai) && isValidProduto(incoming()) && incoming().cai == cai;
+      allow delete: if isSignedIn() && isValidId(cai);
+    }
+
+    match /perfisMaquininha/{id} {
+      allow get: if isSignedIn() && isValidId(id);
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(id) && isValidPerfil(incoming()) && incoming().id == id;
+      allow update: if isSignedIn() && isValidId(id) && isValidPerfil(incoming()) && incoming().id == id;
+      allow delete: if isSignedIn() && isValidId(id);
+    }
+
+    match /itensPromocionais/{cai} {
+      allow get: if isSignedIn() && isValidId(cai);
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(cai) && isValidPromo(incoming()) && incoming().cai == cai;
+      allow update: if isSignedIn() && isValidId(cai) && isValidPromo(incoming()) && incoming().cai == cai;
+      allow delete: if isSignedIn() && isValidId(cai);
+    }
+
+    match /configuracoes/{docId} {
+      allow get: if isSignedIn() && isValidId(docId);
+      allow list: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(docId) && isValidConfig(incoming());
+      allow update: if isSignedIn() && isValidId(docId) && isValidConfig(incoming());
+      allow delete: if isSignedIn() && isValidId(docId);
+    }
+  }
+}
